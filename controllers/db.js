@@ -118,9 +118,91 @@ function dropDatabase() {
   });
 }
 
+function generateMockData() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await createDatabaseAndTables(); // Ensure the database and tables are created
+
+      // Generate mock data for Users
+      const users = [];
+      for (let i = 1; i <= 100; i++) {
+        const userId = `U${i.toString().padStart(9, '0')}`;
+        users.push({
+          ID_number: userId,
+          phone_number: `12345678${i}`,
+          email: `user${i}@example.com`,
+        });
+      }
+
+      // Insert users into the User table
+      connection.query('INSERT INTO User (ID_number, phone_number, email) VALUES ?', [users.map(u => [u.ID_number, u.phone_number, u.email])]);
+
+      // Generate mock data for Stores
+      const stores = [];
+      for (let i = 1; i <= 1000; i++) {
+        const storeId = generateUUID(); // Function to generate UUID (store_id)
+        const pin = generateRandomPin(); // Function to generate random 6-digit PIN
+        stores.push({
+          store_id: storeId,
+          store_name: `Store ${i}`,
+          pin: pin,
+        });
+      }
+
+      // Insert stores into the Store table
+      connection.query('INSERT INTO Store (store_id, store_name, pin) VALUES ?', [stores.map(s => [s.store_id, s.store_name, s.pin])]);
+
+      // Generate mock data for Consumption
+      const consumptions = [];
+      for (let userId = 1; userId <= 100; userId++) {
+        for (let storeIndex = 0; storeIndex < 10; storeIndex++) {
+          for (let consumptionIndex = 1; consumptionIndex <= 20; consumptionIndex++) {
+            consumptions.push({
+              user_id: userId,
+              amount: Math.floor(Math.random() * 100) + 1,
+              store_id: stores[(userId - 1) * 10 + storeIndex].store_id,
+            });
+          }
+        }
+      }
+
+      // Insert consumptions into the Consumption table
+      connection.query('INSERT INTO Consumption (user_id, amount, store_id) VALUES ?', [consumptions.map(c => [c.user_id, c.amount, c.store_id])]);
+
+      // Generate mock data for Prizes
+      const prizes = [];
+      for (let i = 1; i <= 20; i++) {
+        prizes.push({
+          name: `Prize ${i}`,
+          remaining_quantity: Math.floor(Math.random() * 10) + 1,
+        });
+      }
+
+      // Insert prizes into the Prizes table
+      connection.query('INSERT INTO Prizes (name, remaining_quantity) VALUES ?', [prizes.map(p => [p.name, p.remaining_quantity])]);
+
+      resolve('Mock data created successfully!');
+    } catch (err) {
+      reject(`Error generating mock data: ${err}`);
+    }
+  });
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0,
+      v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function generateRandomPin() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 module.exports = {
   createDatabaseAndTables,
-  dropDatabase
+  dropDatabase,
+  generateMockData,
 };
-
 

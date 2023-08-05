@@ -1,12 +1,5 @@
 const mysql = require('mysql2');
-const { createDatabaseAndTables, dropDatabase } = require('./controllers/db.js'); // adjust the path accordingly
-
-// const connection = mysql.createConnection({
-//   host: 'localhost',
-//   user: 'root',
-//   password: '',
-//   database: 'JinshanLottery'
-// });
+const { createDatabaseAndTables, dropDatabase, generateMockData } = require('./controllers/db.js'); // adjust the path accordingly
 
 
 exports.createDB = (req, res) => {
@@ -35,3 +28,15 @@ exports.dropDownDB = (req, res) => {
       });
 };
 
+exports.generateMockData = (req, res) => {
+  console.log("Received GET request for /db");
+  generateMockData()
+    .then(() => {
+      console.log("Mock data generated successfully!");
+      res.status(200).send("Mock data generated successfully!");
+    })
+    .catch(err => {
+      console.error("Failed to generate mock data:", err);
+      res.status(500).send("Failed to generate mock data: " + err);
+    });
+};
