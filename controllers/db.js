@@ -139,7 +139,7 @@ function generateMockData() {
 
       // Generate mock data for Stores
       const stores = [];
-      for (let i = 1; i <= 1000; i++) {
+      for (let i = 1; i <= 20; i++) {
         const storeId = generateUUID(); // Function to generate UUID (store_id)
         const pin = generateRandomPin(); // Function to generate random 6-digit PIN
         stores.push({
@@ -154,15 +154,15 @@ function generateMockData() {
 
       // Generate mock data for Consumption
       const consumptions = [];
-      for (let userId = 1; userId <= 100; userId++) {
-        for (let storeIndex = 0; storeIndex < 10; storeIndex++) {
-          for (let consumptionIndex = 1; consumptionIndex <= 20; consumptionIndex++) {
-            consumptions.push({
-              user_id: userId,
-              amount: Math.floor(Math.random() * 100) + 1,
-              store_id: stores[(userId - 1) * 10 + storeIndex].store_id,
-            });
-          }
+      for (let storeIndex = 0; storeIndex < 20; storeIndex++) {
+        const storeId = stores[storeIndex].store_id;
+        for (let consumptionIndex = 1; consumptionIndex <= 10; consumptionIndex++) {
+          const randomUserId = Math.floor(Math.random() * 100) + 1;
+          consumptions.push({
+            user_id: randomUserId,
+            amount: Math.floor(Math.random() * 3000) + 1,
+            store_id: storeId,
+          });
         }
       }
 
@@ -181,12 +181,28 @@ function generateMockData() {
       // Insert prizes into the Prizes table
       connection.query('INSERT INTO Prizes (name, remaining_quantity) VALUES ?', [prizes.map(p => [p.name, p.remaining_quantity])]);
 
+      // Generate mock data for User_Prizes (10 random prize winners)
+      const prizeWinners = [];
+      for (let i = 0; i < 10; i++) {
+        const randomUserId = Math.floor(Math.random() * 100) + 1;
+        const randomPrizeId = Math.floor(Math.random() * 20) + 1;
+        prizeWinners.push({
+          user_id: randomUserId,
+          prize_id: randomPrizeId,
+          redeem: false, // Assuming the prize is not redeemed initially
+        });
+      }
+
+      // Insert prize winners into the User_Prizes table
+      connection.query('INSERT INTO User_Prizes (user_id, prize_id, redeem) VALUES ?', [prizeWinners.map(p => [p.user_id, p.prize_id, p.redeem])]);
+
       resolve('Mock data created successfully!');
     } catch (err) {
       reject(`Error generating mock data: ${err}`);
     }
   });
 }
+
 
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
